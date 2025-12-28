@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}House Price Prediction{% endblock %}</title>
+    {% load static %}
+    <style>
+        :root {
+            --bg: #000;
+            --glass: rgba(255, 255, 255, 0.04);
+            --border: rgba(255, 255, 255, 0.12);
+            --text: #eaeaea;
+            --muted: #b5b5b5;
+            --accent: #ff5a2c;
+            --gradient: linear-gradient(135deg, #ff5a2c, #ff875f);
+            --gradient-gold: linear-gradient(135deg, #ffdd59, #ffc107);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Inter", sans-serif;
+        }
+
+        body {
+            background: radial-gradient(ellipse at top, #0a0a0a, #000000);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ================= NAVBAR ================= */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 76px;
+            padding: 0 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        /* ================= LOGO ================= */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: white;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            font-size: 18px;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: linear-gradient(145deg, #111, #000);
+            border: 1px solid var(--border);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-icon svg {
+            width: 60%;
+            height: 60%;
+            display: block;
+        }
+
+        /* ================= MENU ================= */
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            gap: 14px;
+        }
+
+        .nav-item {
+            position: relative;
+            padding: 12px 18px;
+            font-size: 14px;
+            color: var(--muted);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.35s ease;
+        }
+
+        .nav-item::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: 6px;
+            width: 0%;
+            height: 2px;
+            background: var(--gradient);
+            transform: translateX(-50%);
+            transition: width 0.35s ease;
+        }
+
+        .nav-item:hover {
+            color: white;
+            background: rgba(255, 90, 44, 0.1);
+        }
+
+        .nav-item:hover::after,
+        .nav-item.active::after {
+            width: 60%;
+        }
+
+        .nav-item.active {
+            color: white;
+            background: rgba(255, 90, 44, 0.1);
+        }
+
+        /* ================= CTA ================= */
+        .cta {
+            position: relative;
+            padding: 14px 28px;
+            border-radius: 12px;
+            background: var(--gradient);
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(255, 90, 44, 0.45);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(255, 90, 44, 0.6);
+        }
+
+        /* ================= MAIN CONTENT ================= */
+        .main-content {
+            margin-top: 76px;
+            min-height: calc(100vh - 76px);
+        }
+
+        /* ================= HERO SECTION ================= */
+        .hero-section {
+            padding: 100px 20px 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 90, 44, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #ffdd59, #ff5a2c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--muted);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 60px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ================= FEATURES SECTION ================= */
+        .features-section {
+            padding: 100px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 60px;
+            color: white;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: "";
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: var(--gradient);
+            margin: 15px auto;
+            border-radius: 2px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .feature-card {
+            background: rgba(20, 20, 20, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px 30px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255, 90, 44, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 90, 44, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .feature-icon svg {
+            width: 32px;
+            height: 32px;
+            fill: var(--accent);
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .feature-description {
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        /* ================= CTA SECTION ================= */
+        .cta-section {
+            padding: 100px 20px;
+            text-align: center;
+            background: linear-gradient(to bottom, transparent, rgba(255, 90, 44, 0.05));
+        }
+
+        .cta-card {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 60px 40px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            right: -50%;
+            bottom: -50%;
+            background: radial-gradient(circle at center, rgba(255, 90, 44, 0.1), transparent 70%);
+            z-index: -1;
+        }
+
+        .cta-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .cta-description {
+            color: var(--muted);
+            margin-bottom: 40px;
+            line-height: 1.6;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-btn {
+            padding: 18px 36px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+            box-shadow: 0 8px 30px rgba(255, 90, 44, 0.45);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 90, 44, 0.6);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+        }
+
+        .btn-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* ================= TESTIMONIALS ================= */
+        .testimonials-section {
+            padding: 100px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .testimonial-card {
+            background: rgba(20, 20, 20, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .testimonial-text {
+            color: var(--text);
+            font-style: italic;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .author-info h4 {
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .author-info p {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        /* ================= FOOTER ================= */
+        .footer {
+            padding: 60px 20px 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 100px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .footer-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: white;
+        }
+
+        .copyright {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-top: 30px;
+        }
+
+        /* ================= RESPONSIVE ================= */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0 20px;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+                padding: 0 10px;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .cta-card {
+                padding: 40px 20px;
+            }
+
+            .cta-title {
+                font-size: 2rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .cta-btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+
+            .hero-stats {
+                gap: 30px;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar Section -->
+    <nav class="navbar">
+        <div class="logo">
+            <div class="logo-icon">
+                <svg fill="#ffffff" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M499.926,129.885L260.478,62.608c-2.929-0.822-6.026-0.822-8.954,0L12.075,129.885
+        C4.935,131.891,0,138.403,0,145.82v84.966c0,9.141,7.411,16.189,16.552,16.189H28.69v186.125
+        c0,9.141,7.103,16.909,16.244,16.909h98.509h70.621h253.003c9.141,0,16.244-7.768,16.244-16.909V246.973
+        h12.138c9.141,0,16.552-7.048,16.552-16.189v-84.966C512,138.403,507.065,131.891,499.926,129.885z
+        M197.517,416.904H160V315.387h37.517V416.904z
+        M450.207,416.905H230.621V298.454c0-9.141-7.416-16.171-16.557-16.171h-70.621
+        c-9.141,0-16.546,7.03-16.546,16.171v118.45H61.793V246.973h286.607
+        c0.188,1.103,0.21,0.585,0.409,0.775l101.397,96.808V416.905z
+        M450.207,298.861l-53.843-51.887h53.843V298.861z
+        M478.897,213.87H33.103v-20.966h445.793V213.87z
+        M478.897,159.801H33.103v-1.44L256,95.734l222.897,62.626V159.801z" />
+                </svg>
+            </div>
+
+            <span>ESTATIA</span>
+            {% if user_name %}
+            <li style="list-style: none; font-size: 14px; color: var(--muted); margin-left: 15px;">Welcome, {{ user_name }} 👋</li>
+            {% endif %}
+        </div>
+
+        <div class="nav-right">
+           <ul class="nav-menu">
+                <li><a class="nav-item {% if request.path == '/' %}active{% endif %}" href="{% url 'home' %}">Home</a></li>
+                <li><a class="nav-item {% if 'price' in request.path %}active{% endif %}" href="{% url 'price_page' %}">Price Range</a></li>
+                <li><a class="nav-item {% if 'predict' in request.path %}active{% endif %}" href="{% url 'predict' %}">Predict</a></li>
+                <li><a class="nav-item {% if 'floor' in request.path %}active{% endif %}" href="{% url 'floor_map:floor_map_input' %}">Floor Plan</a></li>
+                <li><a class="nav-item {% if 'dashboard' in request.path %}active{% endif %}" href="{% url 'dashboard' %}">Dashboard</a></li>
+            </ul>
+
+            <form method="POST" action="{% url 'logout' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="cta">Logout</button>
+            </form>
+        </div>
+    </nav>
+    <!-- Navbar Section -->
+
+    <div class="main-content">
+        {% block content %}
+        <!-- Default Home Page Content -->
+        <div class="hero-section">
+            <div class="hero-bg"></div>
+            <h1 class="hero-title">AI-Powered House Price Prediction</h1>
+            <p class="hero-subtitle">
+                Get accurate, real-time house price predictions using advanced machine learning algorithms. 
+                Make informed decisions with our comprehensive property analysis platform.
+            </p>
+            
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-number">95%</div>
+                    <div class="stat-label">Accuracy Rate</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">10K+</div>
+                    <div class="stat-label">Properties Analyzed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Real-time Updates</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="features-section">
+            <h2 class="section-title">Why Choose Estatia?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">AI-Powered Accuracy</h3>
+                    <p class="feature-description">
+                        Our advanced machine learning models analyze thousands of data points to provide you with the most accurate price predictions in the market.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Detailed Analytics</h3>
+                    <p class="feature-description">
+                        Get comprehensive insights with interactive charts, market trends, and comparative analysis to understand property value drivers.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Floor Plan Generator</h3>
+                    <p class="feature-description">
+                        Create professional floor plans instantly. Visualize your space and optimize layouts with our intuitive floor plan generator tool.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="cta-section">
+            <div class="cta-card">
+                <h2 class="cta-title">Ready to Get Started?</h2>
+                <p class="cta-description">
+                    Join thousands of users who trust Estatia for accurate house price predictions. 
+                    Whether you're buying, selling, or investing, we've got you covered.
+                </p>
+                <div class="cta-buttons">
+                    <a href="{% url 'predict' %}" class="cta-btn btn-primary">
+                        <svg class="btn-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                        Predict Price Now
+                    </a>
+                    <a href="{% url 'price_page' %}" class="cta-btn btn-secondary">
+                        <svg class="btn-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                        </svg>
+                        View Market Trends
+                    </a>
+                    <a href="{% url 'floor_map:floor_map_input' %}" class="cta-btn btn-secondary">
+                        <svg class="btn-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path fill="currentColor" d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/>
+                        </svg>
+                        Generate Floor Plan
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="testimonials-section">
+            <h2 class="section-title">What Our Users Say</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <p class="testimonial-text">
+                        "Estatia helped me get the perfect price for my property. The predictions were spot on!"
+                    </p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">SR</div>
+                        <div class="author-info">
+                            <h4>Sarah Rodriguez</h4>
+                            <p>Property Investor</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p class="testimonial-text">
+                        "The floor plan generator is amazing! It saved me hours of work and looks professional."
+                    </p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">MJ</div>
+                        <div class="author-info">
+                            <h4>Michael Johnson</h4>
+                            <p>Real Estate Agent</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p class="testimonial-text">
+                        "Accurate predictions and beautiful analytics. This platform is a game-changer!"
+                    </p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">EC</div>
+                        <div class="author-info">
+                            <h4>Emma Chen</h4>
+                            <p>Home Buyer</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7V22H22V7L12 2Z" stroke="currentColor" stroke-width="2"/>
+                        <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    ESTATIA
+                </div>
+                <div class="footer-links">
+                    <a href="{% url 'home' %}" class="footer-link">Home</a>
+                    <a href="{% url 'predict' %}" class="footer-link">Predict Price</a>
+                    <a href="{% url 'price_page' %}" class="footer-link">Price Range</a>
+                    <a href="{% url 'floor_map:floor_map_input' %}" class="footer-link">Floor Plans</a>
+                    <a href="{% url 'dashboard' %}" class="footer-link">Dashboard</a>
+                </div>
+                <div class="copyright">
+                    &copy; 2024 Estatia. All rights reserved. | AI-Powered House Price Prediction System
+                </div>
+            </div>
+        </div>
+        {% endblock %}
+    </div>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

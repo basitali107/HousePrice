@@ -1,0 +1,556 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floor Plan Generator | ESTATIA</title>
+    <style>
+        :root {
+            --bg: #000;
+            --glass: rgba(255, 255, 255, 0.04);
+            --border: rgba(255, 255, 255, 0.12);
+            --text: #eaeaea;
+            --muted: #b5b5b5;
+            --accent: #ff5a2c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Inter", sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at top, #050505, #000);
+            min-height: 100vh;
+            color: var(--text);
+            padding-top: 76px;
+        }
+
+        /* ================= NAVBAR ================= */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 76px;
+            padding: 0 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(180deg,
+                    rgba(255, 255, 255, 0.08),
+                    rgba(255, 255, 255, 0.03));
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+        }
+
+        /* ================= LOGO ================= */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: white;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            font-size: 18px;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: linear-gradient(145deg, #111, #000);
+            border: 1px solid var(--border);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-icon svg {
+            width: 60%;
+            height: 60%;
+            display: block;
+        }
+
+        /* ================= MENU ================= */
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            gap: 14px;
+        }
+
+        .nav-item {
+            position: relative;
+            padding: 12px 18px;
+            font-size: 14px;
+            color: var(--muted);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.35s ease;
+        }
+
+        .nav-item::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: 6px;
+            width: 0%;
+            height: 1px;
+            background: white;
+            transform: translateX(-50%);
+            transition: width 0.35s ease;
+        }
+
+        .nav-item:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .nav-item:hover::after,
+        .nav-item.active::after {
+            width: 40%;
+        }
+
+        .nav-item.active {
+            color: #fff;
+        }
+
+        /* ================= CTA ================= */
+        .cta {
+            position: relative;
+            padding: 14px 28px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #ff5a2c, #ff875f);
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(255, 90, 44, 0.45);
+            border: none;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .cta::before {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.5), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .cta:hover {
+            transform: translateY(-2px);
+        }
+
+        .cta:hover::before {
+            opacity: 1;
+        }
+
+        /* ================= MAIN CONTENT ================= */
+        .main-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #fff, #ff5a2c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-header p {
+            color: var(--muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* ================= FORM STYLES ================= */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(255, 90, 44, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* ================= BUTTONS ================= */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff5a2c, #ff875f);
+            color: white;
+            box-shadow: 0 8px 30px rgba(255, 90, 44, 0.45);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(255, 90, 44, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* ================= LOADING ================= */
+        .loading {
+            display: none;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff5a2c, #ff875f);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 3px;
+        }
+
+        .loading-text {
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-top: 15px;
+        }
+
+        /* ================= RESULTS ================= */
+        .result-container {
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        .result-image {
+            max-width: 100%;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+            margin: 30px 0;
+        }
+
+        .note {
+            color: var(--muted);
+            font-style: italic;
+            font-size: 0.9rem;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+
+        /* ================= ERROR ================= */
+        .error {
+            background: rgba(255, 90, 44, 0.1);
+            border: 1px solid rgba(255, 90, 44, 0.3);
+            color: #ff5a2c;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        /* ================= RESPONSIVE ================= */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0 20px;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+
+            .main-container {
+                padding: 0 15px;
+                margin: 20px auto;
+            }
+
+            .container {
+                padding: 25px;
+            }
+
+            .page-header h1 {
+                font-size: 2.2rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar Section -->
+    <nav class="navbar">
+        <div class="logo">
+            <div class="logo-icon">
+                <svg fill="#ffffff" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M499.926,129.885L260.478,62.608c-2.929-0.822-6.026-0.822-8.954,0L12.075,129.885
+                        C4.935,131.891,0,138.403,0,145.82v84.966c0,9.141,7.411,16.189,16.552,16.189H28.69v186.125
+                        c0,9.141,7.103,16.909,16.244,16.909h98.509h70.621h253.003c9.141,0,16.244-7.768,16.244-16.909V246.973
+                        h12.138c9.141,0,16.552-7.048,16.552-16.189v-84.966C512,138.403,507.065,131.891,499.926,129.885z
+                        M197.517,416.904H160V315.387h37.517V416.904z
+                        M450.207,416.905H230.621V298.454c0-9.141-7.416-16.171-16.557-16.171h-70.621
+                        c-9.141,0-16.546,7.03-16.546,16.171v118.45H61.793V246.973h286.607
+                        c0.188,1.103,0.21,0.585,0.409,0.775l101.397,96.808V416.905z
+                        M450.207,298.861l-53.843-51.887h53.843V298.861z
+                        M478.897,213.87H33.103v-20.966h445.793V213.87z
+                        M478.897,159.801H33.103v-1.44L256,95.734l222.897,62.626V159.801z" />
+                </svg>
+            </div>
+            <span>ESTATIA</span>
+            <li>Welcome, {{ user_name }} 👋</li>
+        </div>
+
+        <div class="nav-right">
+            <ul class="nav-menu">
+                <li><a class="nav-item" href="/home">Home</a></li>
+                <li><a class="nav-item" href="{% url 'price_page' %}">Price Range</a></li>
+                <li><a class="nav-item" href="/predict">Predict</a></li>
+                <li><a class="nav-item active" href="{% url 'floor_map:floor_map_input' %}">Floor Plan Generator</a>
+                </li>
+                <li><a class="nav-item" href="{% url 'dashboard' %}">Dashboard</a></li>
+            </ul>
+
+            <form method="POST" action="{% url 'logout' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="cta">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="container">
+            <div class="page-header">
+                <h1>ML Floor Plan Generator</h1>
+                <p>Fill in details for a more accurate floor plan. Outputs are illustrative and not to exact scale.</p>
+            </div>
+
+            <form method="POST" id="floorPlanForm">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="area">Area</label>
+                    <input type="text" id="area" name="area" class="form-control" placeholder="e.g., 1000 square feet">
+                </div>
+
+                <div class="form-group">
+                    <label for="bedrooms">Number of Bedrooms</label>
+                    <input type="number" id="bedrooms" name="bedrooms" class="form-control" placeholder="e.g., 2"
+                        min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="bathrooms">Number of Bathrooms</label>
+                    <input type="number" id="bathrooms" name="bathrooms" class="form-control" placeholder="e.g., 1"
+                        min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="parking">Parking Details</label>
+                    <input type="text" id="parking" name="parking" class="form-control" placeholder="e.g., for 2 cars">
+                </div>
+
+                <div class="form-group">
+                    <label for="kitchen">Kitchen Details</label>
+                    <input type="text" id="kitchen" name="kitchen" class="form-control"
+                        placeholder="e.g., open kitchen">
+                </div>
+
+                <div class="form-group">
+                    <label for="living_room">Living Room Details</label>
+                    <input type="text" id="living_room" name="living_room" class="form-control"
+                        placeholder="e.g., large living room">
+                </div>
+
+                <div class="form-group">
+                    <label for="style">Style</label>
+                    <select id="style" name="style" class="form-control" >
+                        <option value="modern"style="color: black;">Modern</option>
+                        <option value="traditional" style="color: black;">Traditional</option>
+                        <option value="minimalist" style="color: black;">Minimalist</option>
+                    </select>
+                </div>
+
+                <div class="button-group mt-3">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Generate Floor Plan</button>
+                    <button type="reset" class="btn btn-secondary">Reset Form</button>
+                </div>
+            </form>
+
+            <!-- Display errors -->
+            {% if error %}
+            <div class="alert alert-danger mt-3">{{ error }}</div>
+            {% endif %}
+
+            <!-- Display generated image -->
+            {% if image %}
+            <div class="mt-3">
+                <h5>Generated Floor Plan:</h5>
+                <img src="{% static image %}" class="img-fluid" alt="Generated Floor Plan">
+            </div>
+            {% endif %}
+
+
+            <div class="loading" id="loading">
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <!-- <p class="loading-text">Generating and refining floor plan... This may take 1-2 minutes.</p> -->
+            </div>
+
+            {% if error %}
+            <div class="error">{{ error }}</div>
+            {% endif %}
+
+            {% if image %}
+            <div class="result-container">
+                <h2>Generated Floor Plan</h2>
+                <img src="{% static image %}" alt="Generated Floor Plan" class="result-image">
+                <p class="note">Note: This is an AI-generated illustration. For accurate designs, consult a professional
+                    architect.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('floorPlanForm');
+            const loading = document.getElementById('loading');
+            const progressBar = document.getElementById('progress-bar');
+            const submitBtn = document.getElementById('submitBtn');
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                // Show loading animation
+                loading.classList.add('active');
+                submitBtn.disabled = true;
+
+                // Simulate progress
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5;
+                    progressBar.style.width = progress + '%';
+
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        // Submit the form after animation
+                        setTimeout(() => {
+                            form.submit();
+                        }, 500);
+                    }
+                }, 200);
+            });
+
+            // Reset button functionality
+            const resetBtn = document.querySelector('button[type="reset"]');
+            resetBtn.addEventListener('click', function () {
+                loading.classList.remove('active');
+                progressBar.style.width = '0%';
+                submitBtn.disabled = false;
+            });
+
+            // Auto-hide loading on page load
+            loading.classList.remove('active');
+        });
+    </script>
+</body>
+
+</html>

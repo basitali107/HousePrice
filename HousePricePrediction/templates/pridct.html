@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Page</title>
+    <style>
+        /* Set background color and font style */
+        body {
+            background-color: #f0f8ff;  /* Light blue background */
+            font-family: Arial, sans-serif;  /* Clean font */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;  /* Center horizontally */
+            align-items: center;  /* Center vertically */
+            height: 100vh;  /* Full viewport height */
+        }
+
+        /* Center the content inside a container */
+        .container {
+            text-align: center;
+            padding: 30px;
+            background-color: #ffffff;  /* White background for the content */
+            border-radius: 10px;  /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Subtle shadow */
+            width: 80%;
+            max-width: 600px;  /* Limit maximum width */
+        }
+
+        /* Add style for the heading */
+        h1, h3{
+            font-size: 36px;
+            color: #333333;  /* Dark text color */
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        /* Add a button style for action (if needed) */
+        .button {
+            background-color: #4CAF50;  /* Green background */
+            color: white;
+            border: none;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #45a049;  /* Slightly darker green on hover */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container for the content -->
+    <div class="container">
+        <h1>This is the Predict Price of this house is </h1>
+        <h3>Predicted Price: {{ predicted_price }} .PKR </h3>
+        
+        <button class="button" onclick="window.location.href='/predict'">Get Another Prediction</button>
+
+
+        
+        
+    </div>
+
+</body>
+</html>
